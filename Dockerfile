@@ -3,9 +3,9 @@
 FROM php:8.2-apache
 
 # Ekstensi database yang dipakai FEBMart (mysqli + pdo_mysql)
-# + perbaikan MPM: pastikan hanya mpm_prefork yang aktif (hindari "More than one MPM loaded")
+# + perbaikan MPM: paksa hanya satu MPM (prefork) agar Apache tidak error
 RUN docker-php-ext-install mysqli pdo_mysql \
-    && a2dismod mpm_event mpm_worker 2>/dev/null || true \
+    && rm -f /etc/apache2/mods-enabled/mpm_*.load /etc/apache2/mods-enabled/mpm_*.conf \
     && a2enmod mpm_prefork
 
 # Salin seluruh kode aplikasi ke DocumentRoot Apache
