@@ -1,24 +1,20 @@
-# FEBMart - Dockerfile untuk Railway
-# Basis: PHP 8.2 + Apache (sesuai syarat README: PHP >= 8.2)
-FROM php:8.2-apache
+# FEBMart - Dockerfile untuk Railway v3
+# Strategi: PHP 8.2 CLI + built-in server (php -S).
+# Lebih ringan & stabil daripada Apache (menghindari masalah MPM di image baru).
+FROM php:8.2-cli
 
 # Ekstensi database yang dipakai FEBMart (mysqli + pdo_mysql)
-# + perbaikan MPM: paksa hanya satu MPM (prefork) agar Apache tidak error
-RUN docker-php-ext-install mysqli pdo_mysql \
-    && rm -f /etc/apache2/mods-enabled/mpm_*.load /etc/apache2/mods-enabled/mpm_*.conf \
-    && a2enmod mpm_prefork
+RUN docker-php-ext-install mysqli pdo_mysql
 
-# Salin seluruh kode aplikasi ke DocumentRoot Apache
+WORKDIR /var/www/html
 COPY . /var/www/html/
 
-# Pastikan direktori config & assets bisa ditulis proses web server
-# (dipakai untuk config/database.local.php dan upload gambar produk/user)
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R u+rwX,go+rX /var/www/html
-
-# Entrypoint: mengisi config DB dari environment Railway sebelum Apache jalan
+# Entrypoint: mengisi config DB dari environment Railway sebelum server jalan
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
+    && chown -R www-data:www-data /var/www/html
+
+EXPOSE 8080
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["apache2-foreground"]
+CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8080} -t /var/www/html"]
