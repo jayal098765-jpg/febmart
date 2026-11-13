@@ -1,0 +1,9 @@
+.git
+.gitignore
+.dockerignore
+Dockerfile
+docker-entrypoint.sh
+config_laragon
+*.zip
+*.rar
+*.log
