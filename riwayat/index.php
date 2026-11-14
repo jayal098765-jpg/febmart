@@ -78,7 +78,7 @@ function label_metode(string $metode): string
         'cash' => 'Tunai',
         'transfer' => 'Transfer Bank',
         'qris' => 'QRIS',
-        'kredit' => 'Kredit',
+        'kredit' => 'Kartu Kredit',
     ][$metode] ?? strtoupper($metode);
 }
 ?>

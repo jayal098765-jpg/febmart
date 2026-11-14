@@ -210,12 +210,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'check
         }
 
         $change_amount = $amount_paid - $total;
-    } elseif ($payment_input === 'kredit') {
-        // Kredit: barang dibawa lebih dulu, pembayaran menyusul.
-        $amount_paid = 0.0;
-        $change_amount = 0.0;
     } else {
-        // QRIS & Transfer: pembayaran pas sesuai total, tanpa kembalian.
+        // QRIS, Transfer, & Kartu Kredit: pembayaran pas sesuai total, tanpa kembalian.
         $amount_paid = $total;
         $change_amount = 0.0;
     }
@@ -317,7 +313,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'check
                 number_format($change_amount, 0, ',', '.');
         } elseif ($payment_method === 'kredit') {
             $flash_pesan = "Transaksi $invoice_number berhasil diproses. Stok berhasil dipotong. " .
-                'Pembayaran dicatat sebagai kredit (belum lunas).';
+                'Pembayaran menggunakan Kartu Kredit diterima penuh tanpa kembalian.';
         } else {
             $flash_pesan = "Transaksi $invoice_number berhasil diproses. Stok berhasil dipotong. " .
                 'Pembayaran ' . strtoupper($payment_method) . ' diterima penuh tanpa kembalian.';
@@ -673,7 +669,7 @@ require_once __DIR__ . '/../includes/header.php';
                                     <option value="cash" selected>Tunai (Cash)</option>
                                     <option value="qris">QRIS</option>
                                     <option value="transfer">Transfer Bank</option>
-                                    <option value="kredit">Kredit (Bayar Nanti)</option>
+                                    <option value="kredit">Kartu Kredit</option>
                                 </select>
                             </div>
 
@@ -793,7 +789,7 @@ const catatanNonCash = document.getElementById('catatan-non-cash');
 const CATATAN_METODE = {
     qris: 'Silakan pindai kode QRIS FEBMart sebesar total belanja.',
     transfer: 'Transfer ke rekening FEBMart sebesar total belanja, lalu verifikasi bukti transfer sebelum menyelesaikan transaksi.',
-    kredit: 'Transaksi akan dicatat sebagai kredit (bayar di kemudian hari). Belum ada pembayaran yang diterima.'
+    kredit: 'Pembayaran akan diproses melalui kartu kredit sebesar total belanja, tanpa kembalian.'
 };
 
 function hitungKembalian() {

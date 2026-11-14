@@ -33,7 +33,7 @@ $payment_labels = [
     'cash'    => 'Tunai (Cash)',
     'transfer' => 'Transfer Bank',
     'qris'    => 'QRIS',
-    'kredit'  => 'Kredit',
+    'kredit'  => 'Kartu Kredit',
 ];
 $payment_method = (string)($transaksi['payment_method'] ?? '');
 $payment_label = $payment_labels[$payment_method] ?? strtoupper($payment_method);
@@ -214,11 +214,6 @@ $items = $stmt_items->get_result();
                 <div class="d-flex justify-content-between">
                     <span>Kembalian:</span>
                     <strong>Rp <?= number_format($transaksi['change_amount'], 0, ',', '.'); ?></strong>
-                </div>
-            <?php elseif ($payment_method === 'kredit'): ?>
-                <div class="d-flex justify-content-between mb-1">
-                    <span>Status:</span>
-                    <strong>Belum dibayar</strong>
                 </div>
             <?php else: ?>
                 <div class="d-flex justify-content-between">
