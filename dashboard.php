@@ -168,6 +168,9 @@ if ($result) {
                         <span id="dashboardDate">
                             <?= date('d F Y') ?>
                         </span>
+                        <span id="dashboardJam" class="ms-1">
+                            00:00:00
+                        </span>
                     </div>
 
                 </div>
@@ -485,6 +488,26 @@ function updateDashboardDate() {
 
 updateDashboardDate();
 setInterval(updateDashboardDate, 60000);
+
+const elJam = document.getElementById('dashboardJam');
+
+if (elJam) {
+    const serverEpochMs = <?= time() * 1000 ?>;
+    const offsetServer = Date.now() - serverEpochMs;
+
+    function perbaruiJam() {
+        const sekarang = new Date(Date.now() - offsetServer);
+        const pad = n => String(n).padStart(2, '0');
+
+        elJam.textContent =
+            pad(sekarang.getHours()) + ':' +
+            pad(sekarang.getMinutes()) + ':' +
+            pad(sekarang.getSeconds());
+    }
+
+    perbaruiJam();
+    setInterval(perbaruiJam, 1000);
+}
 
 document.addEventListener('DOMContentLoaded', function () {
 
