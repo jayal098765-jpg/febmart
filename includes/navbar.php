@@ -17,10 +17,11 @@
             <ul class="navbar-nav ms-auto align-items-lg-center">
 
                 <li class="nav-item">
-                    <span class="nav-link">
+                    <a class="nav-link" href="<?= $baseUrl ?>/profil.php"
+                       title="Buka profil saya">
                         <i class="bi bi-person-circle me-1"></i>
                         <?= htmlspecialchars($_SESSION['name'] ?? 'Admin') ?>
-                    </span>
+                    </a>
                 </li>
 
                 <li class="nav-item">
