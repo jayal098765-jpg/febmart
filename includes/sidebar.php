@@ -9,9 +9,16 @@ if ($sidebarPhoto === 'avatar-avatar.svg') {
     $sidebarPhoto = '';
     $_SESSION['photo'] = null;
 }
-$sidebarAvatarSrc = ($sidebarPhoto !== '' && is_file(__DIR__ . '/../assets/img/' . $sidebarPhoto))
-    ? $baseUrl . '/assets/img/' . rawurlencode($sidebarPhoto)
-    : $baseUrl . '/assets/img/avatar-default.svg';
+$sidebarAvatarSrc = $baseUrl . '/assets/img/avatar-default.svg';
+
+if ($sidebarPhoto !== '') {
+    foreach (['uploads', 'img'] as $dir) {
+        if (is_file(__DIR__ . '/../assets/' . $dir . '/' . $sidebarPhoto)) {
+            $sidebarAvatarSrc = $baseUrl . '/assets/' . $dir . '/' . rawurlencode($sidebarPhoto);
+            break;
+        }
+    }
+}
 ?>
 
 <aside class="sidebar p-3">

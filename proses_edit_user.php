@@ -100,7 +100,7 @@ if (isset($_FILES['photo']) && $_FILES['photo']['error'] !== UPLOAD_ERR_NO_FILE)
         die("Format foto harus JPG, PNG, atau WebP!");
     }
 
-    $uploadDirectory = __DIR__ . '/assets/img/';
+    $uploadDirectory = __DIR__ . '/assets/uploads/';
 
     if (!is_dir($uploadDirectory)) {
         die("Folder penyimpanan foto tidak ditemukan!");
@@ -147,10 +147,14 @@ if ($stmt->execute()) {
         !empty($currentPhoto) &&
         !in_array($currentPhoto, ['admin-avatar.svg', 'avatar-default.svg', 'logo.svg'], true)
     ) {
-        $oldPath = __DIR__ . '/assets/img/' . basename($currentPhoto);
+        $oldName = basename($currentPhoto);
 
-        if (is_file($oldPath)) {
-            unlink($oldPath);
+        foreach (['uploads', 'img'] as $dir) {
+            $oldPath = __DIR__ . '/assets/' . $dir . '/' . $oldName;
+
+            if (is_file($oldPath)) {
+                unlink($oldPath);
+            }
         }
     }
 

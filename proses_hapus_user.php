@@ -56,10 +56,14 @@ if ($stmt->execute() && $stmt->affected_rows > 0) {
         !empty($photo) &&
         !in_array($photo, ['admin-avatar.svg', 'avatar-default.svg', 'logo.svg'], true)
     ) {
-        $photoPath = __DIR__ . '/assets/img/' . basename($photo);
+        $photoName = basename($photo);
 
-        if (is_file($photoPath)) {
-            unlink($photoPath);
+        foreach (['uploads', 'img'] as $dir) {
+            $photoPath = __DIR__ . '/assets/' . $dir . '/' . $photoName;
+
+            if (is_file($photoPath)) {
+                unlink($photoPath);
+            }
         }
     }
 

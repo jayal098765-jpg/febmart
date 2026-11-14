@@ -65,12 +65,18 @@ require_once __DIR__ . '/includes/helper.php';
 
                 <?php
                 $fotoProfil = trim((string)($user['photo'] ?? ''));
-                $fotoAda = $fotoProfil !== '' && is_file(__DIR__ . '/assets/img/' . $fotoProfil);
-                $avatarSrc = $fotoAda
-                    ? $baseUrl . '/assets/img/' . rawurlencode($fotoProfil)
-                    : $baseUrl . '/assets/img/avatar-default.svg';
+                $avatarSrc = $baseUrl . '/assets/img/avatar-default.svg';
 
-                $_SESSION['photo'] = $fotoAda ? $fotoProfil : null;
+                if ($fotoProfil !== '') {
+                    foreach (['uploads', 'img'] as $dir) {
+                        if (is_file(__DIR__ . '/assets/' . $dir . '/' . $fotoProfil)) {
+                            $avatarSrc = $baseUrl . '/assets/' . $dir . '/' . rawurlencode($fotoProfil);
+                            break;
+                        }
+                    }
+                }
+
+                $_SESSION['photo'] = $fotoProfil !== '' ? $fotoProfil : null;
                 ?>
 
                 <div class="text-center mb-4">

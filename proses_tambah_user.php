@@ -84,7 +84,7 @@ if (isset($_FILES['photo']) && $_FILES['photo']['error'] !== UPLOAD_ERR_NO_FILE)
         die("Format foto harus JPG, PNG, atau WebP!");
     }
 
-    $uploadDirectory = __DIR__ . '/assets/img/';
+    $uploadDirectory = __DIR__ . '/assets/uploads/';
 
     if (!is_dir($uploadDirectory)) {
         die("Folder penyimpanan foto tidak ditemukan!");
@@ -105,7 +105,7 @@ $stmt = $conn->prepare($query);
 
 if (!$stmt) {
     if ($photoName !== null) {
-        $failedPath = __DIR__ . '/assets/img/' . $photoName;
+        $failedPath = __DIR__ . '/assets/uploads/' . $photoName;
 
         if (is_file($failedPath)) {
             unlink($failedPath);
@@ -134,7 +134,7 @@ if ($stmt->execute()) {
 }
 
 if ($photoName !== null) {
-    $failedPath = __DIR__ . '/assets/img/' . $photoName;
+    $failedPath = __DIR__ . '/assets/uploads/' . $photoName;
 
     if (is_file($failedPath)) {
         unlink($failedPath);
