@@ -10,6 +10,8 @@ $keyword = trim($_GET['cari'] ?? '');
 $kategoriDipilih = trim($_GET['kategori'] ?? '');
 $kategoriResult = $conn->query("SELECT id, name FROM categories ORDER BY name ASC");
 
+$jumlahKolom = strtolower($_SESSION['role']) === 'admin' ? 8 : 7;
+
 $sql = "
     SELECT products.*, categories.name AS nama_kategori
     FROM products
@@ -169,7 +171,10 @@ require_once __DIR__ . '/../includes/helper.php';
                                 <th>Kategori</th>
                                 <th>Harga</th>
                                 <th>Stok</th>
-                                <th class="text-center">Aksi</th>
+
+                                <?php if (strtolower($_SESSION['role']) === 'admin'): ?>
+                                    <th class="text-center">Aksi</th>
+                                <?php endif; ?>
                             </tr>
                         </thead>
 
@@ -241,10 +246,9 @@ require_once __DIR__ . '/../includes/helper.php';
                                             <?= htmlspecialchars($data['stock']); ?>
                                         </td>
 
-                                        <td class="text-center">
+                                        <?php if (strtolower($_SESSION['role']) === 'admin'): ?>
 
-                                            <?php if (strtolower($_SESSION['role']) === 'admin'): ?>
-
+                                            <td class="text-center">
                                                 <div class="d-flex justify-content-center gap-1 flex-wrap">
 
                                                     <a
@@ -267,16 +271,9 @@ require_once __DIR__ . '/../includes/helper.php';
                                                     </a>
 
                                                 </div>
+                                            </td>
 
-                                            <?php else: ?>
-
-                                                <span class="text-muted small">
-                                                    Tidak ada aksi
-                                                </span>
-
-                                            <?php endif; ?>
-
-                                        </td>
+                                        <?php endif; ?>
 
                                     </tr>
 
@@ -285,7 +282,7 @@ require_once __DIR__ . '/../includes/helper.php';
                             <?php else: ?>
 
                                 <tr>
-                                    <td colspan="8" class="text-center py-5">
+                                    <td colspan="<?= $jumlahKolom; ?>" class="text-center py-5">
                                         <i class="bi bi-inbox fs-1 text-muted d-block mb-2"></i>
 
                                         <span class="text-muted">
@@ -299,7 +296,7 @@ require_once __DIR__ . '/../includes/helper.php';
                             <?php endif; ?>
 
                             <tr id="kosong-produk" class="d-none">
-                                <td colspan="8" class="text-center py-5">
+                                <td colspan="<?= $jumlahKolom; ?>" class="text-center py-5">
                                     <i class="bi bi-inbox fs-1 text-muted d-block mb-2"></i>
                                     <span class="text-muted">
                                         Tidak ada produk yang cocok dengan pencarian atau kategori.
