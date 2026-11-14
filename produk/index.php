@@ -310,8 +310,13 @@ require_once __DIR__ . '/../includes/helper.php';
 
                 </div>
 
-                <div class="text-muted small mt-3">
-                    Menampilkan <span id="jumlah-tampil"><?= $query->num_rows; ?></span> data produk.
+                <nav aria-label="Paginasi daftar produk" class="mt-3">
+                    <ul class="pagination justify-content-end mb-0" id="paginasi-produk"></ul>
+                </nav>
+
+                <div class="text-muted small mt-2">
+                    Menampilkan <span id="rentang-tampil">0–0</span> dari
+                    <span id="jumlah-tampil"><?= $query->num_rows; ?></span> data produk.
                 </div>
 
             </div>
@@ -329,32 +334,99 @@ const filterKategori = document.getElementById('filter-kategori');
 const barisProduk = Array.from(document.querySelectorAll('#daftar-produk tr[data-nama]'));
 const kosongProdukRow = document.getElementById('kosong-produk');
 const jumlahTampilEl = document.getElementById('jumlah-tampil');
+const rentangTampilEl = document.getElementById('rentang-tampil');
+const paginasiEl = document.getElementById('paginasi-produk');
+
+const PER_HALAMAN = 10;
+let halamanAktif = 1;
+let hasilFilter = [];
 
 function filterTabelProduk() {
     const kata = (inputCariProduk ? inputCariProduk.value : '').trim().toLowerCase();
     const kategori = filterKategori ? filterKategori.value : '';
-    let tampil = 0;
 
-    barisProduk.forEach(baris => {
+    hasilFilter = barisProduk.filter(baris => {
         const nama = (baris.dataset.nama || '').toLowerCase();
         const kat = (baris.dataset.kategori || '').toLowerCase();
 
         const cocokNama = kata === '' || nama.includes(kata);
         const cocokKategori = kategori === '' || kat === kategori;
-        const cocok = cocokNama && cocokKategori;
 
+        return cocokNama && cocokKategori;
+    });
+
+    halamanAktif = 1;
+    renderTabel();
+}
+
+function renderTabel() {
+    const total = hasilFilter.length;
+    const totalHalaman = Math.max(1, Math.ceil(total / PER_HALAMAN));
+    halamanAktif = Math.min(halamanAktif, totalHalaman);
+
+    const mulai = (halamanAktif - 1) * PER_HALAMAN;
+    const terlihat = hasilFilter.slice(mulai, mulai + PER_HALAMAN);
+    const terlihatSet = new Set(terlihat);
+
+    barisProduk.forEach(baris => {
+        const cocok = terlihatSet.has(baris);
         baris.classList.toggle('d-none', !cocok);
-        if (cocok) tampil++;
     });
 
     if (kosongProdukRow) {
-        kosongProdukRow.classList.toggle('d-none', tampil > 0);
+        kosongProdukRow.classList.toggle('d-none', total > 0);
     }
 
     if (jumlahTampilEl) {
-        jumlahTampilEl.textContent = tampil;
+        jumlahTampilEl.textContent = total;
     }
+
+    if (rentangTampilEl) {
+        rentangTampilEl.textContent = total === 0
+            ? '0–0'
+            : (mulai + 1) + '–' + Math.min(mulai + PER_HALAMAN, total);
+    }
+
+    renderPaginasi(totalHalaman);
 }
+
+function renderPaginasi(totalHalaman) {
+    if (!paginasiEl) return;
+    paginasiEl.innerHTML = '';
+
+    if (totalHalaman <= 1) return;
+
+    const buatItem = (label, halaman, aktif, disabled) => {
+        const li = document.createElement('li');
+        li.className = 'page-item' + (aktif ? ' active' : '') + (disabled ? ' disabled' : '');
+
+        const a = document.createElement('a');
+        a.className = 'page-link';
+        a.href = '#';
+        a.textContent = label;
+
+        a.addEventListener('click', e => {
+            e.preventDefault();
+            if (disabled || aktif) return;
+            halamanAktif = halaman;
+            renderTabel();
+        });
+
+        li.appendChild(a);
+        paginasiEl.appendChild(li);
+    };
+
+    buatItem('Sebelumnya', halamanAktif - 1, false, halamanAktif <= 1);
+
+    for (let i = 1; i <= totalHalaman; i++) {
+        buatItem(String(i), i, i === halamanAktif, false);
+    }
+
+    buatItem('Berikutnya', halamanAktif + 1, false, halamanAktif >= totalHalaman);
+}
+
+hasilFilter = [...barisProduk];
+renderTabel();
 
 if (inputCariProduk) {
     inputCariProduk.addEventListener('input', filterTabelProduk);
