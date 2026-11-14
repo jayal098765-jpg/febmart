@@ -71,6 +71,16 @@ function rupiah(float|string $amount): string
 {
     return 'Rp ' . number_format((float)$amount, 0, ',', '.');
 }
+
+function label_metode(string $metode): string
+{
+    return [
+        'cash' => 'Tunai',
+        'transfer' => 'Transfer Bank',
+        'qris' => 'QRIS',
+        'kredit' => 'Kredit',
+    ][$metode] ?? strtoupper($metode);
+}
 ?>
 <?php
 $pageTitle = 'Riwayat Transaksi';
@@ -113,7 +123,7 @@ require_once __DIR__ . '/../includes/header.php';
                             <td><?= h(date('d/m/Y H:i', strtotime($transaction['transaction_date']))); ?></td>
                             <td><?= h($transaction['cashier_name']); ?></td>
                             <td><?= (int)$transaction['item_count']; ?></td>
-                            <td><span class="badge text-bg-light border"><?= h(strtoupper($transaction['payment_method'])); ?></span></td>
+                            <td><span class="badge text-bg-light border"><?= h(label_metode($transaction['payment_method'])); ?></span></td>
                             <td class="text-nowrap"><?= rupiah($transaction['total']); ?></td>
                             <td class="text-nowrap">
                                 <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#detail-<?= $transaction_id; ?>">
@@ -161,8 +171,11 @@ require_once __DIR__ . '/../includes/header.php';
                             <div class="ms-auto" style="max-width:260px">
                                 <div class="d-flex justify-content-between"><span>Subtotal</span><span><?= rupiah($transaction['subtotal']); ?></span></div>
                                 <div class="d-flex justify-content-between fw-bold"><span>Total</span><span><?= rupiah($transaction['total']); ?></span></div>
+                                <div class="d-flex justify-content-between"><span>Metode</span><span><?= h(label_metode($transaction['payment_method'])); ?></span></div>
                                 <div class="d-flex justify-content-between"><span>Dibayar</span><span><?= rupiah($transaction['amount_paid']); ?></span></div>
-                                <div class="d-flex justify-content-between"><span>Kembalian</span><span><?= rupiah($transaction['change_amount']); ?></span></div>
+                                <?php if ((float)$transaction['change_amount'] > 0): ?>
+                                    <div class="d-flex justify-content-between"><span>Kembalian</span><span><?= rupiah($transaction['change_amount']); ?></span></div>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="modal-footer">

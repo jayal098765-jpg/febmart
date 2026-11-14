@@ -28,6 +28,16 @@ function rupiah(float|string $amount): string
     return 'Rp ' . number_format((float)$amount, 0, ',', '.');
 }
 
+function label_metode(string $metode): string
+{
+    return [
+        'cash' => 'Tunai',
+        'transfer' => 'Transfer Bank',
+        'qris' => 'QRIS',
+        'kredit' => 'Kredit',
+    ][$metode] ?? strtoupper($metode);
+}
+
 $today = new DateTimeImmutable('today');
 $start_input = is_string($_GET['tanggal_mulai'] ?? null) ? trim($_GET['tanggal_mulai']) : $today->modify('first day of this month')->format('Y-m-d');
 $end_input = is_string($_GET['tanggal_akhir'] ?? null) ? trim($_GET['tanggal_akhir']) : $today->format('Y-m-d');
@@ -161,7 +171,7 @@ require_once __DIR__ . '/../includes/header.php';
                                 <td><?= h(date('d/m/Y H:i', strtotime($transaction['transaction_date']))); ?></td>
                                 <td><?= h($transaction['cashier_name']); ?></td>
                                 <td><?= (int)$transaction['items_sold']; ?></td>
-                                <td><?= h(strtoupper($transaction['payment_method'])); ?></td>
+                                <td><?= h(label_metode($transaction['payment_method'])); ?></td>
                                 <td class="text-nowrap"><?= rupiah($transaction['total']); ?></td>
                             </tr>
                         <?php endforeach; ?>

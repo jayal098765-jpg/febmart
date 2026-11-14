@@ -18,6 +18,16 @@ function rupiah(float|string $amount): string
     return 'Rp ' . number_format((float)$amount, 0, ',', '.');
 }
 
+function label_metode(string $metode): string
+{
+    return [
+        'cash' => 'Tunai',
+        'transfer' => 'Transfer Bank',
+        'qris' => 'QRIS',
+        'kredit' => 'Kredit',
+    ][$metode] ?? strtoupper($metode);
+}
+
 $transaction_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if ($transaction_id === false || $transaction_id === null || $transaction_id < 1) {
     http_response_code(400);
@@ -111,9 +121,11 @@ $details_stmt->close();
     <section class="receipt-totals">
         <div class="row-line"><span>Subtotal</span><strong><?= rupiah($transaction['subtotal']); ?></strong></div>
         <div class="row-line"><span>Total</span><strong><?= rupiah($transaction['total']); ?></strong></div>
-        <div class="row-line"><span>Metode Pembayaran</span><span><?= h(strtoupper($transaction['payment_method'])); ?></span></div>
+        <div class="row-line"><span>Metode Pembayaran</span><span><?= h(label_metode($transaction['payment_method'])); ?></span></div>
         <div class="row-line"><span>Dibayar</span><span><?= rupiah($transaction['amount_paid']); ?></span></div>
-        <div class="row-line"><span>Kembalian</span><span><?= rupiah($transaction['change_amount']); ?></span></div>
+        <?php if ((float)$transaction['change_amount'] > 0): ?>
+            <div class="row-line"><span>Kembalian</span><span><?= rupiah($transaction['change_amount']); ?></span></div>
+        <?php endif; ?>
     </section>
     <footer class="receipt-footer">
         <div>Terima kasih telah berbelanja di FEBMart.</div>

@@ -174,15 +174,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'check
         exit;
     }
 
-    $paid_input = trim((string)($_POST['nominal_bayar'] ?? ''));
+    $payment_input = trim((string)($_POST['payment_method'] ?? ''));
+    $metode_diperbolehkan = ['cash', 'transfer', 'qris', 'kredit'];
 
-    if ($paid_input === '' || !ctype_digit($paid_input)) {
-        $_SESSION['flash_error'] = 'Nominal pembayaran harus berupa angka bulat yang valid.';
+    if (!in_array($payment_input, $metode_diperbolehkan, true)) {
+        $_SESSION['flash_error'] = 'Metode pembayaran tidak valid.';
         header("Location: index.php");
         exit;
     }
 
-    $amount_paid = (float)$paid_input;
     $subtotal_transaksi = 0;
 
     foreach ($_SESSION['cart'] as $item) {
@@ -191,15 +191,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'check
 
     $total = $subtotal_transaksi;
 
-    if ($amount_paid < $total) {
-        $kurang = $total - $amount_paid;
-        $_SESSION['flash_error'] = 'Pembayaran kurang Rp ' . number_format($kurang, 0, ',', '.') . '.';
-        header("Location: index.php");
-        exit;
+    if ($payment_input === 'cash') {
+        $paid_input = trim((string)($_POST['nominal_bayar'] ?? ''));
+
+        if ($paid_input === '' || !ctype_digit($paid_input)) {
+            $_SESSION['flash_error'] = 'Nominal pembayaran harus berupa angka bulat yang valid.';
+            header("Location: index.php");
+            exit;
+        }
+
+        $amount_paid = (float)$paid_input;
+
+        if ($amount_paid < $total) {
+            $kurang = $total - $amount_paid;
+            $_SESSION['flash_error'] = 'Pembayaran kurang Rp ' . number_format($kurang, 0, ',', '.') . '.';
+            header("Location: index.php");
+            exit;
+        }
+
+        $change_amount = $amount_paid - $total;
+    } elseif ($payment_input === 'kredit') {
+        // Kredit: barang dibawa lebih dulu, pembayaran menyusul.
+        $amount_paid = 0.0;
+        $change_amount = 0.0;
+    } else {
+        // QRIS & Transfer: pembayaran pas sesuai total, tanpa kembalian.
+        $amount_paid = $total;
+        $change_amount = 0.0;
     }
 
-    $change_amount = $amount_paid - $total;
-    $payment_method = 'cash';
+    $payment_method = $payment_input;
     $invoice_number = 'INV-' . date('Ymd') . '-' . strtoupper(substr(bin2hex(random_bytes(4)), 0, 6));
 
     $conn->begin_transaction();
@@ -290,9 +311,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'check
 
         $conn->commit();
         $_SESSION['cart'] = [];
-        $_SESSION['flash_success'] =
-            "Transaksi $invoice_number berhasil diproses. Stok berhasil dipotong. Kembalian: Rp " .
-            number_format($change_amount, 0, ',', '.');
+
+        if ($payment_method === 'cash') {
+            $flash_pesan = "Transaksi $invoice_number berhasil diproses. Stok berhasil dipotong. Kembalian: Rp " .
+                number_format($change_amount, 0, ',', '.');
+        } elseif ($payment_method === 'kredit') {
+            $flash_pesan = "Transaksi $invoice_number berhasil diproses. Stok berhasil dipotong. " .
+                'Pembayaran dicatat sebagai kredit (belum lunas).';
+        } else {
+            $flash_pesan = "Transaksi $invoice_number berhasil diproses. Stok berhasil dipotong. " .
+                'Pembayaran ' . strtoupper($payment_method) . ' diterima penuh tanpa kembalian.';
+        }
+
+        $_SESSION['flash_success'] = $flash_pesan;
     } catch (Throwable $e) {
         $conn->rollback();
         error_log("Checkout FEBMart: " . $e->getMessage());
@@ -626,6 +657,44 @@ require_once __DIR__ . '/../includes/header.php';
                             <input type="hidden" name="action" value="checkout">
 
                             <div class="mb-3">
+                                <label class="form-label fw-bold">Metode Pembayaran</label>
+
+                                <div class="d-grid gap-2">
+                                    <label class="border rounded p-2 d-flex align-items-center gap-2 metode-option"
+                                        data-metode="cash">
+                                        <input type="radio" name="payment_method" value="cash"
+                                            class="form-check-input mt-0" checked>
+                                        <i class="bi bi-cash-coin fs-5"></i>
+                                        <span>Tunai (Cash)</span>
+                                    </label>
+
+                                    <label class="border rounded p-2 d-flex align-items-center gap-2 metode-option"
+                                        data-metode="qris">
+                                        <input type="radio" name="payment_method" value="qris"
+                                            class="form-check-input mt-0">
+                                        <i class="bi bi-qr-code-scan fs-5"></i>
+                                        <span>QRIS</span>
+                                    </label>
+
+                                    <label class="border rounded p-2 d-flex align-items-center gap-2 metode-option"
+                                        data-metode="transfer">
+                                        <input type="radio" name="payment_method" value="transfer"
+                                            class="form-check-input mt-0">
+                                        <i class="bi bi-bank fs-5"></i>
+                                        <span>Transfer Bank</span>
+                                    </label>
+
+                                    <label class="border rounded p-2 d-flex align-items-center gap-2 metode-option"
+                                        data-metode="kredit">
+                                        <input type="radio" name="payment_method" value="kredit"
+                                            class="form-check-input mt-0">
+                                        <i class="bi bi-credit-card fs-5"></i>
+                                        <span>Kredit (Bayar Nanti)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="area-cash" class="mb-3">
                                 <label class="form-label fw-bold">
                                     Nominal Pembayaran (Cash)
                                 </label>
@@ -672,6 +741,22 @@ require_once __DIR__ . '/../includes/header.php';
                                 <?php endif; ?>
                             </div>
 
+                            <div id="area-non-cash" class="mb-3 d-none">
+                                <label class="form-label fw-bold">Rincian Pembayaran</label>
+
+                                <div class="bg-light rounded p-3">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Total Dibayar</span>
+                                        <strong class="text-primary">
+                                            Rp <?= number_format($total_bayar, 0, ',', '.'); ?>
+                                        </strong>
+                                    </div>
+
+                                    <small id="catatan-non-cash"
+                                        class="text-muted d-block"></small>
+                                </div>
+                            </div>
+
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Kembalian</label>
 
@@ -712,6 +797,15 @@ const inputBayar = document.getElementById('nominal-bayar');
 const displayKembalian = document.getElementById('display-kembalian');
 const totalBayar = <?= (int)$total_bayar; ?>;
 const btnSubmit = document.getElementById('btn-submit-transaksi');
+const areaCash = document.getElementById('area-cash');
+const areaNonCash = document.getElementById('area-non-cash');
+const catatanNonCash = document.getElementById('catatan-non-cash');
+
+const CATATAN_METODE = {
+    qris: 'Silakan pindai kode QRIS FEBMart sebesar total belanja.',
+    transfer: 'Transfer ke rekening FEBMart sebesar total belanja, lalu verifikasi bukti transfer sebelum menyelesaikan transaksi.',
+    kredit: 'Transaksi akan dicatat sebagai kredit (bayar di kemudian hari). Belum ada pembayaran yang diterima.'
+};
 
 function hitungKembalian() {
     if (!inputBayar || !displayKembalian) return;
@@ -742,10 +836,55 @@ function hitungKembalian() {
     }
 }
 
+function updateMetode() {
+    const radioTerpilih = document.querySelector('input[name="payment_method"]:checked');
+    if (!radioTerpilih) return;
+
+    const metode = radioTerpilih.value;
+    const nonCash = metode !== 'cash';
+
+    areaCash.classList.toggle('d-none', nonCash);
+    areaNonCash.classList.toggle('d-none', !nonCash);
+
+    if (nonCash) {
+        if (inputBayar) {
+            inputBayar.removeAttribute('required');
+            inputBayar.disabled = true;
+            inputBayar.value = '';
+        }
+
+        catatanNonCash.textContent = CATATAN_METODE[metode] || '';
+
+        if (displayKembalian) {
+            displayKembalian.textContent = 'Rp 0';
+            displayKembalian.className = 'fw-bold text-success';
+        }
+
+        if (btnSubmit) btnSubmit.disabled = (totalBayar <= 0);
+    } else {
+        if (inputBayar) {
+            inputBayar.setAttribute('required', 'required');
+            inputBayar.disabled = false;
+        }
+
+        hitungKembalian();
+    }
+
+    document.querySelectorAll('.metode-option').forEach(opt => {
+        const radio = opt.querySelector('input[name="payment_method"]');
+        const aktif = radio && radio.checked;
+        opt.classList.toggle('border-primary', aktif);
+        opt.classList.toggle('bg-primary-subtle', aktif);
+    });
+}
+
 if (inputBayar) {
     inputBayar.addEventListener('input', hitungKembalian);
-    hitungKembalian();
 }
+
+document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+    radio.addEventListener('change', updateMetode);
+});
 
 document.querySelectorAll('.quick-payment').forEach(button => {
     button.addEventListener('click', () => {
@@ -753,6 +892,8 @@ document.querySelectorAll('.quick-payment').forEach(button => {
         hitungKembalian();
     });
 });
+
+updateMetode();
 </script>
 
 </body>

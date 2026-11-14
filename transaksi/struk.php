@@ -29,6 +29,15 @@ if (!$transaksi) {
     die("Data transaksi tidak ditemukan. <a href='index.php'>Kembali ke Kasir</a>");
 }
 
+$payment_labels = [
+    'cash'    => 'Tunai (Cash)',
+    'transfer' => 'Transfer Bank',
+    'qris'    => 'QRIS',
+    'kredit'  => 'Kredit',
+];
+$payment_method = (string)($transaksi['payment_method'] ?? '');
+$payment_label = $payment_labels[$payment_method] ?? strtoupper($payment_method);
+
 $stmt_items = $conn->prepare("
     SELECT * FROM transaction_details 
     WHERE transaction_id = ?
@@ -166,8 +175,8 @@ $items = $stmt_items->get_result();
                 <span><?= htmlspecialchars($transaksi['nama_kasir'] ?? 'Kasir'); ?></span>
             </div>
             <div class="d-flex justify-content-between">
-                <span>Pelanggan:</span>
-                <span><?= htmlspecialchars($transaksi['customer_name']); ?></span>
+                <span>Metode:</span>
+                <span><?= htmlspecialchars($payment_label); ?></span>
             </div>
         </div>
 
@@ -194,16 +203,29 @@ $items = $stmt_items->get_result();
         <div class="receipt-totals">
             <div class="d-flex justify-content-between mb-1">
                 <span>Total:</span>
-                <strong>Rp <?= number_format($transaksi['total_amount'], 0, ',', '.'); ?></strong>
+                <strong>Rp <?= number_format($transaksi['total'], 0, ',', '.'); ?></strong>
             </div>
-            <div class="d-flex justify-content-between mb-1">
-                <span>Tunai (Cash):</span>
-                <span>Rp <?= number_format($transaksi['paid_amount'], 0, ',', '.'); ?></span>
-            </div>
-            <div class="d-flex justify-content-between">
-                <span>Kembalian:</span>
-                <strong>Rp <?= number_format($transaksi['change_amount'], 0, ',', '.'); ?></strong>
-            </div>
+
+            <?php if ($payment_method === 'cash'): ?>
+                <div class="d-flex justify-content-between mb-1">
+                    <span>Tunai (Cash):</span>
+                    <span>Rp <?= number_format($transaksi['paid_amount'], 0, ',', '.'); ?></span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Kembalian:</span>
+                    <strong>Rp <?= number_format($transaksi['change_amount'], 0, ',', '.'); ?></strong>
+                </div>
+            <?php elseif ($payment_method === 'kredit'): ?>
+                <div class="d-flex justify-content-between mb-1">
+                    <span>Status:</span>
+                    <strong>Belum dibayar</strong>
+                </div>
+            <?php else: ?>
+                <div class="d-flex justify-content-between">
+                    <span>Dibayar (<?= htmlspecialchars($payment_label); ?>):</span>
+                    <strong>Rp <?= number_format($transaksi['paid_amount'], 0, ',', '.'); ?></strong>
+                </div>
+            <?php endif; ?>
         </div>
 
         <div class="receipt-footer">

@@ -70,6 +70,31 @@ function febmart_column_exists(mysqli $conn, string $table, string $column): boo
     return (int) $row['c'] > 0;
 }
 
+function febmart_enum_has(mysqli $conn, string $table, string $column, string $value): bool
+{
+    $stmt = $conn->prepare(
+        'SELECT COLUMN_TYPE FROM information_schema.COLUMNS '
+        . 'WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?'
+    );
+
+    if (!$stmt) {
+        return true; // anggap sudah ada agar tidak mencoba ALTER
+    }
+
+    $stmt->bind_param('ss', $table, $column);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    if (!$row || !isset($row['COLUMN_TYPE'])) {
+        return true;
+    }
+
+    $type = strtolower((string) $row['COLUMN_TYPE']);
+
+    return strpos($type, "'" . strtolower($value) . "'") !== false;
+}
+
 function febmart_apply_migrations(mysqli $conn, array $tabelAda): void
 {
     $migrasi = [
@@ -102,6 +127,15 @@ function febmart_apply_migrations(mysqli $conn, array $tabelAda): void
 
             @$conn->query($migrasi['sql']);
         }
+    }
+
+    // Tambah nilai 'kredit' pada ENUM payment_method tabel transactions.
+    if (in_array('transactions', $tabelAda, true)
+        && !febmart_enum_has($conn, 'transactions', 'payment_method', 'kredit')) {
+        @$conn->query(
+            "ALTER TABLE transactions MODIFY COLUMN payment_method "
+            . "ENUM('cash', 'transfer', 'qris', 'kredit') NOT NULL DEFAULT 'cash'"
+        );
     }
 }
 

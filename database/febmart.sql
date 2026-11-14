@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     total DECIMAL(12,2) NOT NULL DEFAULT 0.00,
     amount_paid DECIMAL(12,2) NOT NULL DEFAULT 0.00,
     change_amount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-    payment_method ENUM('cash', 'transfer', 'qris') NOT NULL DEFAULT 'cash',
+    payment_method ENUM('cash', 'transfer', 'qris', 'kredit') NOT NULL DEFAULT 'cash',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_transactions_user
         FOREIGN KEY (user_id) REFERENCES users(id)
