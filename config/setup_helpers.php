@@ -137,6 +137,11 @@ function febmart_apply_migrations(mysqli $conn, array $tabelAda): void
             . "ENUM('cash', 'transfer', 'qris', 'kredit') NOT NULL DEFAULT 'cash'"
         );
     }
+
+    // Hapus transaksi seed/demo agar hanya invoice asli yang tersisa.
+    if (in_array('transactions', $tabelAda, true)) {
+        @$conn->query("DELETE FROM transactions WHERE invoice_number LIKE 'SEED-FEB-%'");
+    }
 }
 
 function febmart_run_sql_file(mysqli $conn, string $sqlFile, string $dbName = 'febmart'): array

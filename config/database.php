@@ -1,5 +1,8 @@
 <?php
 
+// Waktu aplikasi mengikuti WIB (UTC+7) agar tanggal transaksi konsisten.
+date_default_timezone_set('Asia/Jakarta');
+
 // Koneksi DB otomatis: config lokal -> buat DB/tabel bila perlu.
 mysqli_report(MYSQLI_REPORT_OFF);
 
@@ -57,6 +60,7 @@ if ($conn->connect_errno) {
 }
 
 $conn->set_charset('utf8mb4');
+$conn->query("SET time_zone = '+07:00'");
 
 $analisis = febmart_table_analysis($conn);
 
