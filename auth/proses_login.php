@@ -56,7 +56,6 @@ $_SESSION['user_id'] = (int) $user['id'];
 $_SESSION['name'] = $user['name'];
 $_SESSION['username'] = $user['username'];
 $_SESSION['role'] = $user['role'];
-$_SESSION['photo'] = $user['photo'] ?? null;
 
 header("Location: ../dashboard.php");
 exit;

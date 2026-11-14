@@ -23,7 +23,7 @@ if ($id === (int) $_SESSION['user_id']) {
     exit;
 }
 
-$getUser = $conn->prepare("SELECT photo FROM users WHERE id = ?");
+$getUser = $conn->prepare("SELECT id FROM users WHERE id = ?");
 $getUser->bind_param("i", $id);
 $getUser->execute();
 
@@ -47,25 +47,8 @@ if (!$stmt) {
 $stmt->bind_param("i", $id);
 
 if ($stmt->execute() && $stmt->affected_rows > 0) {
-    $photo = $user['photo'];
-
     $stmt->close();
     $conn->close();
-
-    if (
-        !empty($photo) &&
-        !in_array($photo, ['admin-avatar.svg', 'avatar-default.svg', 'logo.svg'], true)
-    ) {
-        $photoName = basename($photo);
-
-        foreach (['uploads', 'img'] as $dir) {
-            $photoPath = __DIR__ . '/assets/' . $dir . '/' . $photoName;
-
-            if (is_file($photoPath)) {
-                unlink($photoPath);
-            }
-        }
-    }
 
     header("Location: users.php?status=hapus_berhasil");
     exit;

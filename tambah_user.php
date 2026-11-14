@@ -63,15 +63,6 @@ require_once __DIR__ . '/includes/header.php';
                         </select>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Foto Profil</label>
-                        <input type="file" name="photo" class="form-control"
-                               accept="image/jpeg,image/png,image/webp">
-                        <small class="text-muted">
-                            Format JPG/PNG/WebP, maks 2 MB. Opsional.
-                        </small>
-                    </div>
-
                     <div class="d-flex justify-content-between flex-wrap gap-2 pt-3 border-top">
                         <a href="index.php" class="btn btn-secondary">Kembali</a>
 

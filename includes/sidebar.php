@@ -4,21 +4,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 $currentPath = str_replace('\\', '/', $_SERVER['PHP_SELF']);
 $sidebarUserName = trim((string)($_SESSION['name'] ?? ''));
 $sidebarUserRole = trim((string)($_SESSION['role'] ?? ''));
-$sidebarPhoto = trim((string)($_SESSION['photo'] ?? ''));
-if ($sidebarPhoto === 'avatar-avatar.svg') {
-    $sidebarPhoto = '';
-    $_SESSION['photo'] = null;
-}
 $sidebarAvatarSrc = $baseUrl . '/assets/img/avatar-default.svg';
-
-if ($sidebarPhoto !== '') {
-    foreach (['uploads', 'img'] as $dir) {
-        if (is_file(__DIR__ . '/../assets/' . $dir . '/' . $sidebarPhoto)) {
-            $sidebarAvatarSrc = $baseUrl . '/assets/' . $dir . '/' . rawurlencode($sidebarPhoto);
-            break;
-        }
-    }
-}
 ?>
 
 <aside class="sidebar p-3">

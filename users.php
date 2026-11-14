@@ -120,27 +120,6 @@ require_once __DIR__ . '/includes/header.php';
                                 <td><?= $no++; ?></td>
 
                                 <td>
-                                    <?php if (!empty($user['photo'])): ?>
-                                        <?php
-                                        $fotoUser = trim((string)$user['photo']);
-                                        $srcFotoUser = '';
-                                        foreach (['uploads', 'img'] as $dir) {
-                                            if (is_file(__DIR__ . '/assets/' . $dir . '/' . $fotoUser)) {
-                                                $srcFotoUser = 'assets/' . $dir . '/' . rawurlencode($fotoUser);
-                                                break;
-                                            }
-                                        }
-                                        ?>
-                                        <?php if ($srcFotoUser !== ''): ?>
-                                            <img src="<?= htmlspecialchars($srcFotoUser); ?>"
-                                                 width="30"
-                                                 height="30"
-                                                 class="me-2"
-                                                 alt="Foto pengguna"
-                                                 style="border-radius:50%;object-fit:cover;">
-                                        <?php endif; ?>
-                                    <?php endif; ?>
-
                                     <?= htmlspecialchars($user['name']); ?>
                                 </td>
 

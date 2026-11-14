@@ -75,27 +75,6 @@ require_once __DIR__ . '/includes/header.php';
                         </select>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Foto Profil (Opsional)</label><br>
-                        <?php if (!empty($user['photo'])): ?>
-                            <?php
-                            $fotoEdit = trim((string)$user['photo']);
-                            $srcFotoEdit = '';
-                            foreach (['uploads', 'img'] as $dir) {
-                                if (is_file(__DIR__ . '/assets/' . $dir . '/' . $fotoEdit)) {
-                                    $srcFotoEdit = 'assets/' . $dir . '/' . rawurlencode($fotoEdit);
-                                    break;
-                                }
-                            }
-                            ?>
-                            <?php if ($srcFotoEdit !== ''): ?>
-                                <img src="<?= htmlspecialchars($srcFotoEdit); ?>" width="80" class="mb-2 rounded-circle">
-                            <?php endif; ?>
-                        <?php endif; ?>
-                        <input type="file" name="photo" class="form-control" accept="image/*">
-                        <small class="text-muted">Biarkan kosong jika tidak ingin mengganti foto.</small>
-                    </div>
-
                     <div class="d-flex justify-content-between pt-3 border-top">
                         <a href="index.php" class="btn btn-secondary">Kembali</a>
                         <button type="submit" class="btn btn-primary">Simpan Perubahan</button>

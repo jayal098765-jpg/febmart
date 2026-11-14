@@ -63,30 +63,8 @@ require_once __DIR__ . '/includes/helper.php';
         <div class="card border-0 shadow-sm" style="max-width: 600px;">
             <div class="card-body p-4">
 
-                <?php
-                $fotoProfil = trim((string)($user['photo'] ?? ''));
-                $avatarSrc = $baseUrl . '/assets/img/avatar-default.svg';
-
-                if ($fotoProfil !== '') {
-                    foreach (['uploads', 'img'] as $dir) {
-                        if (is_file(__DIR__ . '/assets/' . $dir . '/' . $fotoProfil)) {
-                            $avatarSrc = $baseUrl . '/assets/' . $dir . '/' . rawurlencode($fotoProfil);
-                            break;
-                        }
-                    }
-                }
-
-                $_SESSION['photo'] = $fotoProfil !== '' ? $fotoProfil : null;
-                ?>
-
                 <div class="text-center mb-4">
-                    <img src="<?= htmlspecialchars($avatarSrc); ?>"
-                        onerror="this.onerror=null;this.src='<?= htmlspecialchars($baseUrl); ?>/assets/img/avatar-default.svg';"
-                        alt="Foto profil"
-                        class="rounded-circle border shadow-sm"
-                        style="width:96px;height:96px;object-fit:cover;">
-
-                    <h5 class="fw-bold mt-3 mb-1"><?= htmlspecialchars($user['name']); ?></h5>
+                    <h5 class="fw-bold mb-1"><?= htmlspecialchars($user['name']); ?></h5>
                     <span class="badge bg-primary text-white border-0">
                         <?= htmlspecialchars(ucfirst($user['role'])); ?>
                     </span>

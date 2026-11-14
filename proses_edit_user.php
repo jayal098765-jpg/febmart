@@ -30,19 +30,6 @@ if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     die("Format email tidak valid!");
 }
 
-$getUser = $conn->prepare("SELECT id, photo FROM users WHERE id = ?");
-$getUser->bind_param("i", $id);
-$getUser->execute();
-
-$userData = $getUser->get_result()->fetch_assoc();
-$getUser->close();
-
-if (!$userData) {
-    die("Pengguna tidak ditemukan!");
-}
-
-$currentPhoto = $userData['photo'];
-
 $check = $conn->prepare(
     "SELECT id FROM users WHERE username = ? AND id != ?"
 );
@@ -71,92 +58,26 @@ if ($email !== '') {
     $check->close();
 }
 
-$newPhoto = $currentPhoto;
-$uploadedPath = null;
-
-if (isset($_FILES['photo']) && $_FILES['photo']['error'] !== UPLOAD_ERR_NO_FILE) {
-    if ($_FILES['photo']['error'] !== UPLOAD_ERR_OK) {
-        die("Upload foto gagal. Silakan coba lagi.");
-    }
-
-    if (!is_uploaded_file($_FILES['photo']['tmp_name'])) {
-        die("File foto tidak valid!");
-    }
-
-    if ($_FILES['photo']['size'] > 2 * 1024 * 1024) {
-        die("Ukuran foto maksimal 2 MB!");
-    }
-
-    $finfo = new finfo(FILEINFO_MIME_TYPE);
-    $mime = $finfo->file($_FILES['photo']['tmp_name']);
-
-    $allowedTypes = [
-        'image/jpeg' => 'jpg',
-        'image/png' => 'png',
-        'image/webp' => 'webp'
-    ];
-
-    if (!isset($allowedTypes[$mime])) {
-        die("Format foto harus JPG, PNG, atau WebP!");
-    }
-
-    $uploadDirectory = __DIR__ . '/assets/uploads/';
-
-    if (!is_dir($uploadDirectory)) {
-        die("Folder penyimpanan foto tidak ditemukan!");
-    }
-
-    $newPhoto = bin2hex(random_bytes(16)) . '.' . $allowedTypes[$mime];
-    $uploadedPath = $uploadDirectory . $newPhoto;
-
-    if (!move_uploaded_file($_FILES['photo']['tmp_name'], $uploadedPath)) {
-        die("Gagal menyimpan foto profil.");
-    }
-}
-
-$query = "UPDATE users
-          SET name = ?, username = ?, email = ?, role = ?, photo = ?
-          WHERE id = ?";
-
-$stmt = $conn->prepare($query);
+$stmt = $conn->prepare(
+    "UPDATE users SET name = ?, username = ?, email = ?, role = ? WHERE id = ?"
+);
 
 if (!$stmt) {
-    if ($uploadedPath !== null && is_file($uploadedPath)) {
-        unlink($uploadedPath);
-    }
-
     die("Gagal menyiapkan query: " . $conn->error);
 }
 
 $stmt->bind_param(
-    "sssssi",
+    "ssssi",
     $name,
     $username,
     $email,
     $role,
-    $newPhoto,
     $id
 );
 
 if ($stmt->execute()) {
     $stmt->close();
     $conn->close();
-
-    if (
-        $newPhoto !== $currentPhoto &&
-        !empty($currentPhoto) &&
-        !in_array($currentPhoto, ['admin-avatar.svg', 'avatar-default.svg', 'logo.svg'], true)
-    ) {
-        $oldName = basename($currentPhoto);
-
-        foreach (['uploads', 'img'] as $dir) {
-            $oldPath = __DIR__ . '/assets/' . $dir . '/' . $oldName;
-
-            if (is_file($oldPath)) {
-                unlink($oldPath);
-            }
-        }
-    }
 
     header("Location: users.php?status=edit_berhasil");
     exit;
@@ -166,9 +87,5 @@ $error = $stmt->error;
 
 $stmt->close();
 $conn->close();
-
-if ($uploadedPath !== null && is_file($uploadedPath)) {
-    unlink($uploadedPath);
-}
 
 die("Gagal memperbarui pengguna: " . $error);
