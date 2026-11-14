@@ -142,6 +142,14 @@ function febmart_apply_migrations(mysqli $conn, array $tabelAda): void
     if (in_array('transactions', $tabelAda, true)) {
         @$conn->query("DELETE FROM transactions WHERE invoice_number LIKE 'SEED-FEB-%'");
     }
+
+    // Ganti SKU produk seed (FBM-SEED-xxx) menjadi SKU normal (FBM-xxx).
+    if (in_array('products', $tabelAda, true)) {
+        @$conn->query(
+            "UPDATE products SET sku = REPLACE(sku, 'FBM-SEED-', 'FBM-') "
+            . "WHERE sku LIKE 'FBM-SEED-%'"
+        );
+    }
 }
 
 function febmart_run_sql_file(mysqli $conn, string $sqlFile, string $dbName = 'febmart'): array
