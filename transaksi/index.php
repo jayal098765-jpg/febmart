@@ -657,41 +657,17 @@ require_once __DIR__ . '/../includes/header.php';
                             <input type="hidden" name="action" value="checkout">
 
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Metode Pembayaran</label>
+                                <label class="form-label fw-bold" for="pilih-metode">
+                                    Metode Pembayaran
+                                </label>
 
-                                <div class="d-grid gap-2">
-                                    <label class="border rounded p-2 d-flex align-items-center gap-2 metode-option"
-                                        data-metode="cash">
-                                        <input type="radio" name="payment_method" value="cash"
-                                            class="form-check-input mt-0" checked>
-                                        <i class="bi bi-cash-coin fs-5"></i>
-                                        <span>Tunai (Cash)</span>
-                                    </label>
-
-                                    <label class="border rounded p-2 d-flex align-items-center gap-2 metode-option"
-                                        data-metode="qris">
-                                        <input type="radio" name="payment_method" value="qris"
-                                            class="form-check-input mt-0">
-                                        <i class="bi bi-qr-code-scan fs-5"></i>
-                                        <span>QRIS</span>
-                                    </label>
-
-                                    <label class="border rounded p-2 d-flex align-items-center gap-2 metode-option"
-                                        data-metode="transfer">
-                                        <input type="radio" name="payment_method" value="transfer"
-                                            class="form-check-input mt-0">
-                                        <i class="bi bi-bank fs-5"></i>
-                                        <span>Transfer Bank</span>
-                                    </label>
-
-                                    <label class="border rounded p-2 d-flex align-items-center gap-2 metode-option"
-                                        data-metode="kredit">
-                                        <input type="radio" name="payment_method" value="kredit"
-                                            class="form-check-input mt-0">
-                                        <i class="bi bi-credit-card fs-5"></i>
-                                        <span>Kredit (Bayar Nanti)</span>
-                                    </label>
-                                </div>
+                                <select class="form-select" id="pilih-metode"
+                                    name="payment_method">
+                                    <option value="cash" selected>Tunai (Cash)</option>
+                                    <option value="qris">QRIS</option>
+                                    <option value="transfer">Transfer Bank</option>
+                                    <option value="kredit">Kredit (Bayar Nanti)</option>
+                                </select>
                             </div>
 
                             <div id="area-cash" class="mb-3">
@@ -713,6 +689,12 @@ require_once __DIR__ . '/../includes/header.php';
                                 <?php if (!empty($_SESSION['cart'])): ?>
 
                                     <div class="d-flex flex-wrap gap-2 mt-2">
+                                        <button type="button"
+                                            class="btn btn-sm btn-outline-secondary quick-payment"
+                                            data-clear="1">
+                                            0
+                                        </button>
+
                                         <button type="button"
                                             class="btn btn-sm btn-outline-secondary quick-payment"
                                             data-amount="<?= (int)$total_bayar; ?>">
@@ -836,11 +818,12 @@ function hitungKembalian() {
     }
 }
 
-function updateMetode() {
-    const radioTerpilih = document.querySelector('input[name="payment_method"]:checked');
-    if (!radioTerpilih) return;
+const metodeSelect = document.getElementById('pilih-metode');
 
-    const metode = radioTerpilih.value;
+function updateMetode() {
+    if (!metodeSelect) return;
+
+    const metode = metodeSelect.value;
     const nonCash = metode !== 'cash';
 
     areaCash.classList.toggle('d-none', nonCash);
@@ -869,26 +852,24 @@ function updateMetode() {
 
         hitungKembalian();
     }
-
-    document.querySelectorAll('.metode-option').forEach(opt => {
-        const radio = opt.querySelector('input[name="payment_method"]');
-        const aktif = radio && radio.checked;
-        opt.classList.toggle('border-primary', aktif);
-        opt.classList.toggle('bg-primary-subtle', aktif);
-    });
 }
 
 if (inputBayar) {
     inputBayar.addEventListener('input', hitungKembalian);
 }
 
-document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
-    radio.addEventListener('change', updateMetode);
-});
+if (metodeSelect) {
+    metodeSelect.addEventListener('change', updateMetode);
+}
 
 document.querySelectorAll('.quick-payment').forEach(button => {
     button.addEventListener('click', () => {
-        inputBayar.value = button.dataset.amount;
+        if (button.dataset.clear !== undefined) {
+            inputBayar.value = '';
+        } else {
+            inputBayar.value = button.dataset.amount;
+        }
+
         hitungKembalian();
     });
 });
