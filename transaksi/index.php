@@ -703,20 +703,26 @@ require_once __DIR__ . '/../includes/header.php';
 
                                         <button type="button"
                                             class="btn btn-sm btn-outline-secondary quick-payment"
-                                            data-amount="<?= (int)($total_bayar + 10000); ?>">
-                                            +10.000
+                                            data-amount="10000">
+                                            10.000
                                         </button>
 
                                         <button type="button"
                                             class="btn btn-sm btn-outline-secondary quick-payment"
-                                            data-amount="<?= (int)($total_bayar + 20000); ?>">
-                                            +20.000
+                                            data-amount="25000">
+                                            25.000
                                         </button>
 
                                         <button type="button"
                                             class="btn btn-sm btn-outline-secondary quick-payment"
-                                            data-amount="<?= (int)($total_bayar + 50000); ?>">
-                                            +50.000
+                                            data-amount="50000">
+                                            50.000
+                                        </button>
+
+                                        <button type="button"
+                                            class="btn btn-sm btn-outline-secondary quick-payment"
+                                            data-amount="100000">
+                                            100.000
                                         </button>
                                     </div>
 
