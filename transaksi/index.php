@@ -580,7 +580,7 @@ require_once __DIR__ . '/../includes/header.php';
 
                                             <div class="d-flex gap-1">
 
-                                                <form method="POST" class="d-flex gap-1">
+                                                <form method="POST" class="d-flex gap-1 align-items-center">
                                                     <input type="hidden" name="csrf_token"
                                                         value="<?= htmlspecialchars($csrf_token); ?>">
                                                     <input type="hidden" name="action" value="update">
@@ -594,21 +594,25 @@ require_once __DIR__ . '/../includes/header.php';
                                                         class="form-control form-control-sm"
                                                         style="width:65px;">
 
-                                                    <button class="btn btn-sm btn-outline-primary"
-                                                        type="submit" title="Perbarui jumlah">
-                                                        <i class="bi bi-check-lg"></i>
+                                                    <button class="btn btn-sm btn-outline-primary
+                                                        d-inline-flex align-items-center justify-content-center"
+                                                        type="submit" title="Perbarui jumlah"
+                                                        style="width:34px;">
+                                                        <i class="bi bi-check"></i>
                                                     </button>
                                                 </form>
 
-                                                <form method="POST">
+                                                <form method="POST" class="d-flex align-items-center">
                                                     <input type="hidden" name="csrf_token"
                                                         value="<?= htmlspecialchars($csrf_token); ?>">
                                                     <input type="hidden" name="action" value="hapus">
                                                     <input type="hidden" name="product_id"
                                                         value="<?= (int)$id; ?>">
 
-                                                    <button class="btn btn-sm btn-outline-danger"
-                                                        type="submit" title="Hapus item">
+                                                    <button class="btn btn-sm btn-outline-danger
+                                                        d-inline-flex align-items-center justify-content-center"
+                                                        type="submit" title="Hapus item"
+                                                        style="width:34px;">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 </form>
