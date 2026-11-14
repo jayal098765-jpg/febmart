@@ -592,8 +592,8 @@ require_once __DIR__ . '/../includes/header.php';
                                                         style="width:65px;">
 
                                                     <button class="btn btn-sm btn-outline-primary"
-                                                        type="submit">
-                                                        <i class="bi bi-arrow-repeat"></i>
+                                                        type="submit" title="Perbarui jumlah">
+                                                        <i class="bi bi-check-lg"></i>
                                                     </button>
                                                 </form>
 
@@ -605,7 +605,7 @@ require_once __DIR__ . '/../includes/header.php';
                                                         value="<?= (int)$id; ?>">
 
                                                     <button class="btn btn-sm btn-outline-danger"
-                                                        type="submit">
+                                                        type="submit" title="Hapus item">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 </form>
