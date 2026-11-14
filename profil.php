@@ -69,20 +69,21 @@ require_once __DIR__ . '/includes/helper.php';
                 $avatarSrc = $fotoAda
                     ? $baseUrl . '/assets/img/' . rawurlencode($fotoProfil)
                     : $baseUrl . '/assets/img/avatar-default.svg';
+
+                $_SESSION['photo'] = $fotoAda ? $fotoProfil : null;
                 ?>
 
-                <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="text-center mb-4">
                     <img src="<?= htmlspecialchars($avatarSrc); ?>"
-                        width="70" height="70"
-                        class="rounded-circle border"
-                        alt="Foto profil">
+                        onerror="this.onerror=null;this.src='<?= htmlspecialchars($baseUrl); ?>/assets/img/avatar-default.svg';"
+                        alt="Foto profil"
+                        class="rounded-circle border shadow-sm"
+                        style="width:96px;height:96px;object-fit:cover;">
 
-                    <div>
-                        <h5 class="fw-bold mb-1"><?= htmlspecialchars($user['name']); ?></h5>
-                        <span class="badge bg-primary text-white border-0">
-                            <?= htmlspecialchars(ucfirst($user['role'])); ?>
-                        </span>
-                    </div>
+                    <h5 class="fw-bold mt-3 mb-1"><?= htmlspecialchars($user['name']); ?></h5>
+                    <span class="badge bg-primary text-white border-0">
+                        <?= htmlspecialchars(ucfirst($user['role'])); ?>
+                    </span>
                 </div>
 
                 <form action="proses_profil.php" method="POST">
