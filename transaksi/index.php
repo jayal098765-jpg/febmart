@@ -566,7 +566,7 @@ require_once __DIR__ . '/../includes/header.php';
                                             <?= htmlspecialchars($cart_item['sku']); ?>
                                             <br>
                                             Rp <?= number_format((float)$cart_item['price'], 0, ',', '.'); ?>
-                                            Ã— <?= (int)$cart_item['qty']; ?>
+                                            × <?= (int)$cart_item['qty']; ?>
                                         </small>
 
                                         <div class="d-flex justify-content-between align-items-center mt-2">
