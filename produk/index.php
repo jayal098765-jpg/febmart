@@ -94,7 +94,7 @@ require_once __DIR__ . '/../includes/helper.php';
 
                     <div class="d-flex align-items-center flex-wrap gap-2">
 
-                        <span class="badge bg-light text-dark border p-2">
+                        <span class="badge bg-primary text-white border-0 p-2">
                             <i class="bi bi-box-seam me-1"></i>
                             Total: <?= $query->num_rows; ?> Produk
                         </span>
