@@ -63,8 +63,16 @@ require_once __DIR__ . '/includes/helper.php';
         <div class="card border-0 shadow-sm" style="max-width: 600px;">
             <div class="card-body p-4">
 
+                <?php
+                $fotoProfil = trim((string)($user['photo'] ?? ''));
+                $fotoAda = $fotoProfil !== '' && is_file(__DIR__ . '/assets/img/' . $fotoProfil);
+                $avatarSrc = $fotoAda
+                    ? $baseUrl . '/assets/img/' . rawurlencode($fotoProfil)
+                    : $baseUrl . '/assets/img/avatar-default.svg';
+                ?>
+
                 <div class="d-flex align-items-center gap-3 mb-4">
-                    <img src="<?= $baseUrl ?>/assets/img/avatar-default.svg"
+                    <img src="<?= htmlspecialchars($avatarSrc); ?>"
                         width="70" height="70"
                         class="rounded-circle border"
                         alt="Foto profil">
