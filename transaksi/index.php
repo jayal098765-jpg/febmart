@@ -698,12 +698,6 @@ require_once __DIR__ . '/../includes/header.php';
                                     <div class="d-flex flex-wrap gap-2 mt-2">
                                         <button type="button"
                                             class="btn btn-sm btn-outline-secondary quick-payment"
-                                            data-clear="1">
-                                            0
-                                        </button>
-
-                                        <button type="button"
-                                            class="btn btn-sm btn-outline-secondary quick-payment"
                                             data-amount="<?= (int)$total_bayar; ?>">
                                             Uang Pas
                                         </button>
