@@ -421,6 +421,7 @@ require_once __DIR__ . '/../includes/header.php';
                         <form method="GET" class="mb-3">
                             <div class="input-group">
                                 <input type="text" name="cari"
+                                    id="cari-produk"
                                     class="form-control"
                                     placeholder="Cari nama produk atau SKU..."
                                     value="<?= htmlspecialchars($search); ?>">
@@ -443,7 +444,9 @@ require_once __DIR__ . '/../includes/header.php';
 
                                 <?php while ($item = $produk->fetch_assoc()): ?>
 
-                                    <div class="d-flex align-items-center gap-3 border rounded p-3 mb-2">
+                                    <div class="d-flex align-items-center gap-3 border rounded p-3 mb-2 produk-item"
+                                        data-nama="<?= htmlspecialchars(strtolower($item['name'])); ?>"
+                                        data-sku="<?= htmlspecialchars(strtolower($item['sku'])); ?>">
 
                                         <?php if (!empty($item['image']) && file_exists(__DIR__ . '/../assets/img/' . $item['image'])): ?>
 
@@ -499,7 +502,7 @@ require_once __DIR__ . '/../includes/header.php';
 
                             <?php else: ?>
 
-                                <div class="text-center text-muted py-5">
+                                <div id="kosong-produk" class="text-center text-muted py-5">
                                     <i class="bi bi-box-seam fs-1 d-block mb-2"></i>
                                     Produk tidak ditemukan.
                                 </div>
@@ -881,6 +884,34 @@ document.querySelectorAll('.quick-payment').forEach(button => {
 });
 
 updateMetode();
+</script>
+
+<script>
+const inputCari = document.getElementById('cari-produk');
+const produkItems = Array.from(document.querySelectorAll('.produk-item'));
+const kosongProduk = document.getElementById('kosong-produk');
+
+function filterProduk() {
+    const kata = (inputCari ? inputCari.value : '').trim().toLowerCase();
+    let jumlahTampil = 0;
+
+    produkItems.forEach(baris => {
+        const nama = (baris.dataset.nama || '').toLowerCase();
+        const sku = (baris.dataset.sku || '').toLowerCase();
+        const cocok = kata === '' || nama.includes(kata) || sku.includes(kata);
+
+        baris.classList.toggle('d-none', !cocok);
+        if (cocok) jumlahTampil++;
+    });
+
+    if (kosongProduk) {
+        kosongProduk.classList.toggle('d-none', jumlahTampil > 0);
+    }
+}
+
+if (inputCari) {
+    inputCari.addEventListener('input', filterProduk);
+}
 </script>
 
 </body>

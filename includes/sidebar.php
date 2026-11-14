@@ -72,10 +72,12 @@ $sidebarAvatarSrc = ($sidebarPhoto !== '' && is_file(__DIR__ . '/../assets/img/'
 
     <hr class="sidebar-divider">
 
-    <a href="<?= $baseUrl ?>/users.php"
-       class="sidebar-link <?= $currentPage === 'users.php' ? 'active' : '' ?>">
-        <i class="bi bi-people"></i>
-        Kelola User
-    </a>
+    <?php if (strtolower($sidebarUserRole) === 'admin'): ?>
+        <a href="<?= $baseUrl ?>/users.php"
+           class="sidebar-link <?= $currentPage === 'users.php' ? 'active' : '' ?>">
+            <i class="bi bi-people"></i>
+            Kelola User
+        </a>
+    <?php endif; ?>
 
 </aside>
