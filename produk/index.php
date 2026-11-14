@@ -7,6 +7,8 @@ requireRole(['Admin', 'Kasir']);
 require_once __DIR__ . '/../config/database.php';
 
 $keyword = trim($_GET['cari'] ?? '');
+$kategoriDipilih = trim($_GET['kategori'] ?? '');
+$kategoriResult = $conn->query("SELECT id, name FROM categories ORDER BY name ASC");
 
 $sql = "
     SELECT products.*, categories.name AS nama_kategori
@@ -107,20 +109,44 @@ require_once __DIR__ . '/../includes/helper.php';
 
                 <form method="GET" class="mb-4">
 
-                    <div class="input-group" style="max-width: 420px;">
+                    <div class="d-flex align-items-center flex-wrap gap-2">
 
-                        <input
-                            type="text"
-                            name="cari"
-                            class="form-control"
-                            placeholder="Cari nama produk..."
-                            value="<?= htmlspecialchars($keyword); ?>"
+                        <div class="input-group" style="max-width: 320px;">
+
+                            <input
+                                type="text"
+                                name="cari"
+                                id="cari-produk"
+                                class="form-control"
+                                placeholder="Cari nama produk..."
+                                value="<?= htmlspecialchars($keyword); ?>"
+                            >
+
+                            <button type="submit" class="btn btn-dark">
+                                <i class="bi bi-search me-1"></i>
+                                Cari
+                            </button>
+
+                        </div>
+
+                        <select
+                            name="kategori"
+                            id="filter-kategori"
+                            class="form-select"
+                            style="max-width: 220px;"
+                            aria-label="Filter kategori"
                         >
+                            <option value="">Semua Kategori</option>
 
-                        <button type="submit" class="btn btn-dark">
-                            <i class="bi bi-search me-1"></i>
-                            Cari
-                        </button>
+                            <?php if ($kategoriResult): ?>
+                                <?php while ($kat = $kategoriResult->fetch_assoc()): ?>
+                                    <option value="<?= htmlspecialchars(strtolower($kat['name'])); ?>"
+                                        <?= $kategoriDipilih === strtolower($kat['name']) ? 'selected' : ''; ?>>
+                                        <?= htmlspecialchars($kat['name']); ?>
+                                    </option>
+                                <?php endwhile; ?>
+                            <?php endif; ?>
+                        </select>
 
                         <a href="index.php" class="btn btn-outline-secondary">
                             Reset
@@ -147,7 +173,7 @@ require_once __DIR__ . '/../includes/helper.php';
                             </tr>
                         </thead>
 
-                        <tbody>
+                        <tbody id="daftar-produk">
 
                             <?php if ($query->num_rows > 0): ?>
 
@@ -155,7 +181,10 @@ require_once __DIR__ . '/../includes/helper.php';
 
                                 <?php while ($data = $query->fetch_assoc()): ?>
 
-                                    <tr>
+                                    <tr
+                                        data-nama="<?= htmlspecialchars(strtolower($data['name'])); ?>"
+                                        data-kategori="<?= htmlspecialchars(strtolower($data['nama_kategori'] ?? '-')); ?>"
+                                    >
 
                                         <td class="text-center">
                                             <?= $no++; ?>
@@ -269,6 +298,15 @@ require_once __DIR__ . '/../includes/helper.php';
 
                             <?php endif; ?>
 
+                            <tr id="kosong-produk" class="d-none">
+                                <td colspan="8" class="text-center py-5">
+                                    <i class="bi bi-inbox fs-1 text-muted d-block mb-2"></i>
+                                    <span class="text-muted">
+                                        Tidak ada produk yang cocok dengan pencarian atau kategori.
+                                    </span>
+                                </td>
+                            </tr>
+
                         </tbody>
 
                     </table>
@@ -276,7 +314,7 @@ require_once __DIR__ . '/../includes/helper.php';
                 </div>
 
                 <div class="text-muted small mt-3">
-                    Menampilkan <?= $query->num_rows; ?> data produk.
+                    Menampilkan <span id="jumlah-tampil"><?= $query->num_rows; ?></span> data produk.
                 </div>
 
             </div>
@@ -287,6 +325,48 @@ require_once __DIR__ . '/../includes/helper.php';
 </div>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
+
+<script>
+const inputCariProduk = document.getElementById('cari-produk');
+const filterKategori = document.getElementById('filter-kategori');
+const barisProduk = Array.from(document.querySelectorAll('#daftar-produk tr[data-nama]'));
+const kosongProdukRow = document.getElementById('kosong-produk');
+const jumlahTampilEl = document.getElementById('jumlah-tampil');
+
+function filterTabelProduk() {
+    const kata = (inputCariProduk ? inputCariProduk.value : '').trim().toLowerCase();
+    const kategori = filterKategori ? filterKategori.value : '';
+    let tampil = 0;
+
+    barisProduk.forEach(baris => {
+        const nama = (baris.dataset.nama || '').toLowerCase();
+        const kat = (baris.dataset.kategori || '').toLowerCase();
+
+        const cocokNama = kata === '' || nama.includes(kata);
+        const cocokKategori = kategori === '' || kat === kategori;
+        const cocok = cocokNama && cocokKategori;
+
+        baris.classList.toggle('d-none', !cocok);
+        if (cocok) tampil++;
+    });
+
+    if (kosongProdukRow) {
+        kosongProdukRow.classList.toggle('d-none', tampil > 0);
+    }
+
+    if (jumlahTampilEl) {
+        jumlahTampilEl.textContent = tampil;
+    }
+}
+
+if (inputCariProduk) {
+    inputCariProduk.addEventListener('input', filterTabelProduk);
+}
+
+if (filterKategori) {
+    filterKategori.addEventListener('change', filterTabelProduk);
+}
+</script>
 
 <?php
 $stmt->close();
