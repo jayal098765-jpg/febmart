@@ -159,7 +159,6 @@ if ($result) {
                                     'Admin'
                                 ) ?>
                             </strong>
-                            👋
                         </p>
                     </div>
 
